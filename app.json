@@ -19,10 +19,19 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.example.musicplayer"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "5947dc60-96b8-41f1-affd-22f6f3e6740b"
+      }
     }
   }
 }
