@@ -16,7 +16,7 @@ const ArtistsScreen = () => {
 
   const logout = () => {
     router.replace("(login)");
-  }
+  };
 
   const getUserInfo = async () => {
     try {
@@ -28,11 +28,10 @@ const ArtistsScreen = () => {
       } else {
         console.log("No such document!");
       }
-    
     } catch (error) {
       console.log("Error getting document:", error);
     }
-  }
+  };
 
   useEffect(() => {
     getUserInfo();
@@ -44,13 +43,13 @@ const ArtistsScreen = () => {
         <Text>Account</Text>
       </View>
       <View style={styles.headerContainer}>
-          <FastImage
-            source={{
-              uri: avatarUri,
-              priority: FastImage.priority.normal,
-            }}
-            style={styles.avatar}
-          />
+        <FastImage
+          source={{
+            uri: avatarUri,
+            priority: FastImage.priority.normal,
+          }}
+          style={styles.avatar}
+        />
         <Text style={styles.accountName}>{userInformation.fullname}</Text>
         <Text style={styles.accountNumber}>{userInformation.email}</Text>
       </View>
@@ -66,10 +65,7 @@ const ArtistsScreen = () => {
             />
           </View>
 
-          <TouchableOpacity
-            style={{ width: "100%" }}
-            onPress={() => logout()}
-          >
+          <TouchableOpacity style={{ width: "100%" }} onPress={() => logout()}>
             <Text numberOfLines={1} style={styles.artistNameText}>
               {"Logout"}
             </Text>
