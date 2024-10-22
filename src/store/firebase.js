@@ -5,12 +5,12 @@ import { getFirestore, collection, getDocs } from "firebase/firestore";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDAcxlP71P6N_L1sPRNuGAvyihZKr3Sgf4",
-  authDomain: "music-player-e6223.firebaseapp.com",
-  projectId: "music-player-e6223",
-  storageBucket: "music-player-e6223.appspot.com",
-  messagingSenderId: "603898252821",
-  appId: "1:603898252821:web:4359e0802b90d9132c881c",
+  apiKey: "AIzaSyCk0gFO7FVXeUH2lyVDeyc5jnTjalNmVbQ",
+  authDomain: "musicappgroup3-ffe2a.firebaseapp.com",
+  projectId: "musicappgroup3-ffe2a",
+  storageBucket: "musicappgroup3-ffe2a.appspot.com",
+  messagingSenderId: "606228771903",
+  appId: "1:606228771903:web:c7e8c1d2da8c80e1fa348a"
 };
 
 // Initialize Firebase
