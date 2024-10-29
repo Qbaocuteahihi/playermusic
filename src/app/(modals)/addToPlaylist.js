@@ -6,7 +6,6 @@ import {
   StyleSheet,
   View,
   TextInput,
-  Button,
   Alert,
   ActivityIndicator,
   FlatList,
@@ -86,11 +85,23 @@ const AddToPlaylistModal = () => {
           style={styles.input}
         />
         {isCreating ? (
-          <ActivityIndicator size="large" color="#0000ff" />
+          <ActivityIndicator size="large" color="#BB86FC" />
         ) : (
           <>
-            <Button title="Tạo Playlist" onPress={handleCreatePlaylist} />
-            <Button title="Hủy" onPress={() => router.dismiss()} />
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                onPress={handleCreatePlaylist}
+                style={styles.button}
+              >
+                <Text style={styles.buttonText}>Tạo Playlist</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => router.dismiss()}
+                style={styles.button}
+              >
+                <Text style={styles.buttonText}>Hủy</Text>
+              </TouchableOpacity>
+            </View>
             <FlatList
               data={playlists}
               keyExtractor={(item) => item.id}
@@ -115,16 +126,18 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     paddingHorizontal: screenPadding.horizontal,
+    justifyContent: "center", // Căn giữa theo chiều dọc
+    backgroundColor: "#121212", // Màu nền tối
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    backgroundColor: "#f9f9f9",
-    borderRadius: 8,
+    borderColor: "#555", // Màu viền tối hơn
+    backgroundColor: "#333", // Màu nền của ô nhập liệu tối hơn
+    borderRadius: 10, // Bo tròn góc
     padding: 15,
     marginBottom: 10,
     fontSize: 16,
-    color: "#333",
+    color: "white", // Màu chữ trong ô nhập liệu
   },
   playlistList: {
     marginTop: 20,
@@ -133,14 +146,32 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#f9f9f9",
-    borderRadius: 8,
+    backgroundColor: "#333", // Nền tối cho các mục playlist
+    borderRadius: 10, // Bo tròn góc
     padding: 15,
     marginBottom: 10,
   },
   playlistName: {
     fontSize: 16,
-    color: "#333",
+    color: "white", // Màu chữ trắng cho các mục playlist
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: 5,
+    backgroundColor: "#BB86FC", // Màu nút
+    borderRadius: 10, // Bo tròn góc nút
+    paddingVertical: 12,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 

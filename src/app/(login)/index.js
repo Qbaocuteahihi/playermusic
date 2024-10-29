@@ -8,16 +8,24 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Image,
 } from "react-native";
 import { useLoginStore } from "@/store/library";
 import { signInWithEmailAndPassword } from "firebase/auth";
+
 const LoginScreen = () => {
   const [gmailString, setgmailString] = useState("");
   const [passwordString, setPasswordString] = useState("");
+  const [errorMessage, setErrorMessage] = useState(""); // State để lưu trữ thông báo lỗi
   const router = useRouter();
   const loginStore = useLoginStore();
 
   const onNext = async () => {
+    if (!gmailString || !passwordString) {
+      setErrorMessage("Vui lòng nhập Email và Password");
+      return;
+    }
+
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -30,41 +38,53 @@ const LoginScreen = () => {
         loginStore.setToken(userCredential.user.uid);
       }
     } catch (error) {
+      setErrorMessage("Sai Email hoặc Password. Vui lòng thử lại");
       console.log("Error signing in", error);
     }
   };
 
   return (
     <View style={styles.container}>
-      <View>
-        <Text style={styles.title}>Welcome to MusicApp</Text>
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Gmail</Text>
-          <TextInput
-            style={styles.inputStyle}
-            placeholder="Enter your email"
-            value={gmailString}
-            onChangeText={(text) => setgmailString(text)}
-          />
-        </View>
-        <View style={styles.inputContainer}>
-          <Text style={styles.inputLabel}>Password</Text>
-          <TextInput
-            placeholder="Enter your password"
-            value={passwordString}
-            onChangeText={(text) => setPasswordString(text)}
-            secureTextEntry={true}
-          />
-        </View>
+      {/* Logo lớn */}
+      <Image
+        source={require("../../../assets/logoapp.png")} // Thay đường dẫn logo của bạn ở đây
+        style={styles.logo}
+      />
+
+      <View style={styles.inputWrapper}>
+        {/* Email Input */}
+        <TextInput
+          style={styles.inputStyle}
+          placeholder="Email"
+          value={gmailString}
+          onChangeText={(text) => setgmailString(text)}
+          placeholderTextColor="#999"
+        />
+
+        {/* Password Input */}
+        <TextInput
+          style={styles.inputStyle}
+          placeholder="Password"
+          value={passwordString}
+          onChangeText={(text) => setPasswordString(text)}
+          secureTextEntry={true}
+          placeholderTextColor="#999"
+        />
       </View>
 
+      {/* Hiển thị thông báo lỗi */}
+      {errorMessage ? (
+        <Text style={styles.errorText}>{errorMessage}</Text>
+      ) : null}
+
+      {/* Login Button */}
       <TouchableOpacity onPress={() => onNext()} style={styles.buttonContainer}>
-        <Text style={{ color: "white" }}>Đăng Nhập</Text>
+        <Text style={styles.buttonText}>Đăng Nhập</Text>
       </TouchableOpacity>
+
+      {/* Đăng ký */}
       <View style={styles.registerContainer}>
-        <Text style={styles.unregisterText}>
-          Bạn chưa có tài khoản?  {" "}
-        </Text>
+        <Text style={styles.unregisterText}>Bạn chưa có tài khoản? </Text>
         <TouchableOpacity
           onPress={() => {
             router.push(`register`);
@@ -81,63 +101,61 @@ export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 28,
-    width: "100%",
-    backgroundColor: "white",
     flex: 1,
-    paddingTop: 60,
-  },
-  rowView: {
-    flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
-    alignSelf: "flex-start",
+    backgroundColor: "#121212",
+    paddingHorizontal: 30,
+  },
+  logo: {
+    width: 280, // Điều chỉnh kích thước logo lớn
+    height: 280,
+    marginBottom: 10, // Khoảng cách giữa logo và input
+  },
+  inputWrapper: {
     width: "100%",
+    alignItems: "center",
     marginBottom: 20,
   },
   inputStyle: {
-    marginTop: 8,
+    width: 300,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 30,
+    backgroundColor: "#f3f3f3", // Nền màu nhạt hơn cho input
+    fontSize: 16,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3.84,
+    elevation: 5, // Đổ bóng nhẹ
   },
-  forgotText: {
-    fontWeight: "600",
-    color: "#FB344F",
-    textAlign: "right",
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 60,
-  },
-  inputLabel: {
-    color: colors.primary,
-  },
-  buttonStyle: {
-    backgroundColor: colors.primary,
-    height: 40,
-  },
-  inputContainer: {
-    marginBottom: 10,
-  },
-  rememberContainer: {
-    flexDirection: "row",
+  buttonContainer: {
+    width: 300,
+    backgroundColor: "#FF4B4B", // Màu đỏ của nút bấm
+    borderRadius: 25,
+    paddingVertical: 12,
     alignItems: "center",
-    flex: 1,
+    marginTop: 0,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 18,
   },
   registerContainer: {
-    marginTop: 20,
-    alignSelf: "center",
+    position: "absolute",
+    bottom: 10, // Căn chỉnh phần đăng ký xuống giữa
     flexDirection: "row",
   },
   unregisterText: {
     color: "#999EA1",
   },
   primaryText: {
-    color: colors.primary,
+    color: "#FF4B4B", // Màu đỏ cho chữ đăng ký
   },
-  buttonContainer: {
-    backgroundColor: colors.primary,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 5,
-    marginTop: 20,
+  errorText: {
+    color: "red",
+    marginBottom: 10,
   },
 });

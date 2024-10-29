@@ -12,13 +12,56 @@ import { db } from "@/store/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { auth } from "@/store/firebase";
 import { useRouter } from "expo-router";
+
 const RegisterScreen = () => {
   const router = useRouter();
   const [emailString, setEmailString] = useState("");
   const [fullnameString, setFullnameString] = useState("");
   const [passwordString, setPasswordString] = useState("");
   const [confirmPasswordString, setConfirmPasswordString] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [fullnameError, setFullnameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+
   const registerAccount = async () => {
+    let hasError = false;
+
+    if (!emailString) {
+      setEmailError("Bạn chưa nhập email");
+      hasError = true;
+    } else {
+      setEmailError("");
+    }
+
+    if (!fullnameString) {
+      setFullnameError("Bạn chưa nhập tên đầy đủ");
+      hasError = true;
+    } else {
+      setFullnameError("");
+    }
+
+    if (!passwordString) {
+      setPasswordError("Bạn chưa nhập mật khẩu");
+      hasError = true;
+    } else {
+      setPasswordError("");
+    }
+
+    if (!confirmPasswordString) {
+      setConfirmPasswordError("Bạn chưa nhập xác nhận mật khẩu");
+      hasError = true;
+    } else if (passwordString !== confirmPasswordString) {
+      setConfirmPasswordError("Mật khẩu và xác nhận mật khẩu không khớp");
+      hasError = true;
+    } else {
+      setConfirmPasswordError("");
+    }
+
+    if (hasError) {
+      return;
+    }
+
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -54,10 +97,14 @@ const RegisterScreen = () => {
             <TextInput
               style={styles.phoneInputStyle}
               placeholder="Enter your email"
+              placeholderTextColor="#A9A9A9"
               value={emailString}
               onChangeText={(text) => setEmailString(text)}
             />
           </View>
+          {emailError ? (
+            <Text style={styles.errorText}>{emailError}</Text>
+          ) : null}
         </View>
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Full name</Text>
@@ -65,10 +112,14 @@ const RegisterScreen = () => {
             <TextInput
               style={styles.phoneInputStyle}
               placeholder="Enter your full name"
+              placeholderTextColor="#A9A9A9"
               value={fullnameString}
               onChangeText={(text) => setFullnameString(text)}
             />
           </View>
+          {fullnameError ? (
+            <Text style={styles.errorText}>{fullnameError}</Text>
+          ) : null}
         </View>
 
         <View style={styles.inputContainer}>
@@ -77,11 +128,15 @@ const RegisterScreen = () => {
             <TextInput
               style={styles.phoneInputStyle}
               placeholder="Enter your password"
+              placeholderTextColor="#A9A9A9"
               value={passwordString}
               onChangeText={(text) => setPasswordString(text)}
               secureTextEntry={true}
             />
           </View>
+          {passwordError ? (
+            <Text style={styles.errorText}>{passwordError}</Text>
+          ) : null}
         </View>
         <View style={styles.inputContainer}>
           <Text style={styles.inputLabel}>Confirm Password</Text>
@@ -89,11 +144,15 @@ const RegisterScreen = () => {
             <TextInput
               style={styles.phoneInputStyle}
               placeholder="Enter your password again"
+              placeholderTextColor="#A9A9A9"
               value={confirmPasswordString}
               onChangeText={(text) => setConfirmPasswordString(text)}
               secureTextEntry={true}
             />
           </View>
+          {confirmPasswordError ? (
+            <Text style={styles.errorText}>{confirmPasswordError}</Text>
+          ) : null}
         </View>
       </View>
 
@@ -101,7 +160,7 @@ const RegisterScreen = () => {
         onPress={() => registerAccount()}
         style={styles.buttonContainer}
       >
-        <Text style={{ color: "white" }}>Đăng ký</Text>
+        <Text style={{ color: "white", fontSize: 18 }}>Đăng ký</Text>
       </TouchableOpacity>
       <View style={styles.registerContainer}>
         <Text style={styles.unregisterText}>Đã có tài khoản </Text>
@@ -116,13 +175,14 @@ const RegisterScreen = () => {
     </View>
   );
 };
+
 export default RegisterScreen;
 
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 28,
     width: "100%",
-    backgroundColor: "white",
+    backgroundColor: "#121212",
     flex: 1,
     paddingTop: 60,
   },
@@ -137,11 +197,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   phoneInputStyle: {
+    height: 50,
     paddingLeft: 8,
     paddingTop: 14,
     paddingRight: 8,
     paddingBottom: 14,
-    backgroundColor: "white",
+    color: "white",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -152,17 +213,18 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
+    color: "white",
   },
   inputLabel: {
-    color: colors.primary,
+    color: "white",
+    fontSize: 18,
   },
   buttonStyle: {
     backgroundColor: colors.primary,
     height: 40,
   },
   inputContainer: {
-    marginBottom: 10,
-    paddingTop: 18,
+    paddingTop: 16,
   },
   rememberContainer: {
     flexDirection: "row",
@@ -187,22 +249,27 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     borderColor: "#C6C6C6",
-    borderWidth: 1,
-    borderRadius: 8,
+    borderWidth: 1.5,
+    borderRadius: 30,
     paddingStart: 12,
     marginTop: 8,
   },
   phonePrefix: {
     borderRightWidth: 1,
-    borderColor: "#C6C6C6",
+    borderColor: "#white",
     paddingRight: 8,
   },
   buttonContainer: {
     backgroundColor: colors.primary,
-    height: 40,
+    height: 50,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 5,
+    borderRadius: 30,
     marginTop: 20,
+  },
+  errorText: {
+    color: "red",
+    marginTop: 5,
+    marginLeft: 12,
   },
 });
