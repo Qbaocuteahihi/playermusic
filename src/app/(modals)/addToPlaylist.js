@@ -24,11 +24,9 @@ const AddToPlaylistModal = () => {
   const { trackUrl } = route.params;
 
   const tracks = useTracks();
-  const { createPlaylist, addToPlaylist, removePlaylist, playlists } =
-    usePlaylists();
+  const { createPlaylist, addToPlaylist, playlists } = usePlaylists();
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const track = tracks.find((currentTrack) => trackUrl === currentTrack.url);
 
@@ -67,30 +65,14 @@ const AddToPlaylistModal = () => {
     }
   };
 
-  const handleDeletePlaylist = (playlist) => {
-    Alert.alert(
-      "Xác nhận xóa",
-      `Bạn có chắc chắn muốn xóa playlist "${playlist.name}" không?`,
-      [
-        { text: "Hủy", style: "cancel" },
-        {
-          text: "Xóa",
-          onPress: async () => {
-            setIsDeleting(true);
-            try {
-              await removePlaylist(playlist.id);
-              Alert.alert("Playlist đã được xóa thành công!");
-            } catch (error) {
-              Alert.alert("Đã xảy ra lỗi:", error.message);
-              console.error("Error:", error);
-            } finally {
-              setIsDeleting(false);
-            }
-          },
-          style: "destructive",
-        },
-      ]
-    );
+  const handleAddToPlaylist = async (playlist) => {
+    try {
+      await addToPlaylist(track, playlist.name);
+      Alert.alert("Bài hát đã được thêm vào playlist thành công!");
+    } catch (error) {
+      Alert.alert("Đã xảy ra lỗi:", error.message);
+      console.error("Error:", error);
+    }
   };
 
   return (
@@ -103,7 +85,7 @@ const AddToPlaylistModal = () => {
           placeholderTextColor="#999"
           style={styles.input}
         />
-        {isCreating || isDeleting ? (
+        {isCreating ? (
           <ActivityIndicator size="large" color="#0000ff" />
         ) : (
           <>
@@ -115,7 +97,7 @@ const AddToPlaylistModal = () => {
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.playlistItem}
-                  onPress={() => handleDeletePlaylist(item)}
+                  onPress={() => handleAddToPlaylist(item)}
                 >
                   <Text style={styles.playlistName}>{item.name}</Text>
                 </TouchableOpacity>
