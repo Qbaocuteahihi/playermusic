@@ -46,7 +46,6 @@ const PlayerScreen = () => {
         `track-${activeTrack.id}-rating`,
         newRating.toString()
       );
-
     } catch (error) {
       console.error("Error saving track rating:", error);
     }
@@ -110,8 +109,8 @@ const PlayerScreen = () => {
             <View style={styles.trackMetaContainer}>
               <Text numberOfLines={1} style={styles.trackMetaText}>
                 {activeTrack.artist
-                  ? `Ca sĩ: ${activeTrack.artist}`
-                  : "Ca sĩ: Admin chưa cập nhật"}
+                  ? `Trình bày: ${activeTrack.artist}`
+                  : "Trình bày:  Chưa cập nhật"}
               </Text>
 
               <Text
@@ -182,7 +181,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    paddingHorizontal: screenPadding.horizontal,
+    // paddingHorizontal: screenPadding.horizontal,
   },
   artworkImageContainer: {
     shadowOffset: { width: 0, height: 8 },

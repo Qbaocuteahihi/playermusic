@@ -26,6 +26,7 @@ const AddToPlaylistModal = () => {
   const { createPlaylist, addToPlaylist, playlists } = usePlaylists();
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
+  const [showInput, setShowInput] = useState(false); // State to show/hide input
 
   const track = tracks.find((currentTrack) => trackUrl === currentTrack.url);
 
@@ -53,9 +54,11 @@ const AddToPlaylistModal = () => {
       const newPlaylist = await createPlaylist(newPlaylistName);
       await addToPlaylist(track, newPlaylist.name);
 
-      Alert.alert("Bài hát đã được thêm vào playlist thành công!");
+      // Chuyển đến trang playlist ngay sau khi thêm thành công
+      router.push("/playlists"); // Đường dẫn đến trang playlist
+
       setNewPlaylistName("");
-      router.dismiss();
+      setShowInput(false); // Ẩn ô nhập liệu sau khi tạo playlist
     } catch (error) {
       Alert.alert("Đã xảy ra lỗi:", error.message);
       console.error("Error:", error);
@@ -67,41 +70,23 @@ const AddToPlaylistModal = () => {
   const handleAddToPlaylist = async (playlist) => {
     try {
       await addToPlaylist(track, playlist.name);
-      Alert.alert("Bài hát đã được thêm vào playlist thành công!");
+
+      // Chuyển đến trang playlist ngay sau khi thêm thành công
+      router.push("/playlists"); // Đường dẫn đến trang playlist
     } catch (error) {
       Alert.alert("Đã xảy ra lỗi:", error.message);
       console.error("Error:", error);
     }
   };
 
-  return (
-    <SafeAreaView style={[styles.modalContainer, { paddingTop: headerHeight }]}>
-      <View>
-        <TextInput
-          value={newPlaylistName}
-          onChangeText={setNewPlaylistName}
-          placeholder="Nhập tên playlist"
-          placeholderTextColor="#999"
-          style={styles.input}
-        />
-        {isCreating ? (
-          <ActivityIndicator size="large" color="#BB86FC" />
+  const renderPlaylists = () => {
+    return (
+      <View style={styles.playlistsContainer}>
+        {playlists.length === 0 ? (
+          <Text style={styles.noPlaylistsText}>Chưa có playlist nào.</Text>
         ) : (
           <>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                onPress={handleCreatePlaylist}
-                style={styles.button}
-              >
-                <Text style={styles.buttonText}>Tạo Playlist</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => router.dismiss()}
-                style={styles.button}
-              >
-                <Text style={styles.buttonText}>Hủy</Text>
-              </TouchableOpacity>
-            </View>
+            <Text style={styles.playlistTitle}>Danh sách Playlist:</Text>
             <FlatList
               data={playlists}
               keyExtractor={(item) => item.id}
@@ -117,6 +102,42 @@ const AddToPlaylistModal = () => {
             />
           </>
         )}
+        {showInput ? (
+          <>
+            <TextInput
+              value={newPlaylistName}
+              onChangeText={setNewPlaylistName}
+              placeholder="Nhập tên playlist"
+              placeholderTextColor="#999"
+              style={styles.input}
+            />
+            <TouchableOpacity
+              onPress={handleCreatePlaylist}
+              style={styles.createButton}
+            >
+              <Text style={styles.buttonText}>Tạo Playlist</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <TouchableOpacity
+            onPress={() => setShowInput(true)} // Show input when button is pressed
+            style={styles.createButton}
+          >
+            <Text style={styles.buttonText}>Tạo Playlist Mới</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
+
+  return (
+    <SafeAreaView style={[styles.modalContainer, { paddingTop: headerHeight }]}>
+      <View>
+        {isCreating ? (
+          <ActivityIndicator size="large" color="#BB86FC" />
+        ) : (
+          renderPlaylists()
+        )}
       </View>
     </SafeAreaView>
   );
@@ -126,52 +147,64 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     paddingHorizontal: screenPadding.horizontal,
-    justifyContent: "center", // Căn giữa theo chiều dọc
-    backgroundColor: "#121212", // Màu nền tối
+    justifyContent: "center",
+    backgroundColor: "#121212",
   },
   input: {
     borderWidth: 1,
-    borderColor: "#555", // Màu viền tối hơn
-    backgroundColor: "#333", // Màu nền của ô nhập liệu tối hơn
-    borderRadius: 10, // Bo tròn góc
+    borderColor: "#555",
+    backgroundColor: "#333",
+    borderRadius: 10,
     padding: 15,
     marginBottom: 10,
     fontSize: 16,
-    color: "white", // Màu chữ trong ô nhập liệu
+    color: "white",
+  },
+  playlistsContainer: {
+    alignItems: "center",
+    marginTop: 20,
   },
   playlistList: {
-    marginTop: 20,
+    marginTop: 10,
+    width: "100%", // Ensure it takes full width
   },
   playlistItem: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    backgroundColor: "#333", // Nền tối cho các mục playlist
-    borderRadius: 10, // Bo tròn góc
+    backgroundColor: "#333",
+    borderRadius: 10,
     padding: 15,
     marginBottom: 10,
+    width: "100%", // Ensure it takes full width
   },
   playlistName: {
     fontSize: 16,
-    color: "white", // Màu chữ trắng cho các mục playlist
+    color: "white",
   },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 20,
-  },
-  button: {
-    flex: 1,
-    marginHorizontal: 5,
-    backgroundColor: "#BB86FC", // Màu nút
-    borderRadius: 10, // Bo tròn góc nút
+  createButton: {
+    backgroundColor: "#BB86FC",
+    borderRadius: 10,
     paddingVertical: 12,
     alignItems: "center",
+    marginTop: 20,
   },
   buttonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "600",
+  },
+  noPlaylistsText: {
+    color: "white",
+    fontSize: 16,
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  playlistTitle: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
   },
 });
 
