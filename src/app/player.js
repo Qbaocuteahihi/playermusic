@@ -3,25 +3,72 @@ import { PlayerControls } from "@/components/PlayerControls";
 import { PlayerProgressBar } from "@/components/PlayerProgressbar";
 import { PlayerRepeatToggle } from "@/components/PlayerRepeatToggle";
 import { PlayerVolumeBar } from "@/components/PlayerVolumeBar";
-import { TrackRating } from "./TrackRating"; // Import component TrackRating
+import { TrackRating } from "./TrackRating";
 import { unknownTrackImageUri } from "@/constants/images";
 import { colors, fontSize, screenPadding } from "@/constants/tokens";
 import { useTrackPlayerFavorite } from "@/hooks/useTrackPlayerFavorite";
 import { defaultStyles, utilsStyles } from "@/styles";
 import { FontAwesome } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { ActivityIndicator, StyleSheet, Text, View, Alert } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View,
+  PanResponder,
+  Animated,
+  ScrollView,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import FastImage from "react-native-fast-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useActiveTrack } from "react-native-track-player";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+
+const DismissPlayerSymbol = ({ top }) => {
+  return (
+    <View
+      style={{
+        position: "absolute",
+        top: top + 8,
+        left: 0,
+        right: 0,
+        flexDirection: "row",
+        justifyContent: "center",
+      }}
+    >
+      <View accessible={false} style={styles.dismissSymbol} />
+    </View>
+  );
+};
 
 const PlayerScreen = () => {
   const activeTrack = useActiveTrack();
   const { top, bottom } = useSafeAreaInsets();
   const { isFavorite, toggleFavorite } = useTrackPlayerFavorite();
   const [trackRating, setTrackRating] = useState(0);
+  const [showLyrics, setShowLyrics] = useState(false);
+  const [showContent, setShowContent] = useState(true);
+  const pan = useRef(new Animated.Value(0)).current;
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        return Math.abs(gestureState.dx) > 30; // Respond to horizontal swipes
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dx > 100) {
+          // Swipe right to show lyrics
+          setShowLyrics(true);
+          setShowContent(false);
+        } else if (gestureState.dx < -100) {
+          // Swipe left to hide lyrics and show content
+          setShowLyrics(false);
+          setShowContent(true);
+        }
+      },
+    })
+  ).current;
 
   useEffect(() => {
     const getTrackRating = async () => {
@@ -67,7 +114,7 @@ const PlayerScreen = () => {
         imageColors ? [imageColors[0], imageColors[1]] : [colors.background]
       }
     >
-      <View style={styles.overlayContainer}>
+      <View style={styles.overlayContainer} {...panResponder.panHandlers}>
         <DismissPlayerSymbol top={top} />
 
         <View
@@ -87,89 +134,81 @@ const PlayerScreen = () => {
             />
           </View>
 
-          <View style={{ flex: 1, marginTop: 20 }}>
-            <View style={styles.trackInfoContainer}>
-              <View style={styles.trackTitleContainer}>
-                <MovingText
-                  text={activeTrack.title ?? ""}
-                  animationThreshold={30}
-                  style={styles.trackTitleText}
+          {showContent && (
+            <View style={{ flex: 1, marginTop: 20 }}>
+              <View style={styles.trackInfoContainer}>
+                <View style={styles.trackTitleContainer}>
+                  <MovingText
+                    text={activeTrack.title ?? ""}
+                    animationThreshold={30}
+                    style={styles.trackTitleText}
+                  />
+                </View>
+
+                <FontAwesome
+                  name={isFavorite ? "heart" : "heart-o"}
+                  size={20}
+                  color={isFavorite ? colors.primary : colors.icon}
+                  style={styles.favoriteIcon}
+                  onPress={toggleFavorite}
                 />
               </View>
 
-              <FontAwesome
-                name={isFavorite ? "heart" : "heart-o"}
-                size={20}
-                color={isFavorite ? colors.primary : colors.icon}
-                style={styles.favoriteIcon}
-                onPress={toggleFavorite}
-              />
-            </View>
+              <View style={styles.trackMetaContainer}>
+                <Text numberOfLines={1} style={styles.trackMetaText}>
+                  {activeTrack.artist
+                    ? `Trình bày: ${activeTrack.artist}`
+                    : "Trình bày: Chưa cập nhật"}
+                </Text>
 
-            <View style={styles.trackMetaContainer}>
-              <Text numberOfLines={1} style={styles.trackMetaText}>
-                {activeTrack.artist
-                  ? `Trình bày: ${activeTrack.artist}`
-                  : "Trình bày:  Chưa cập nhật"}
-              </Text>
-
-              <Text
-                numberOfLines={1}
-                style={[styles.trackMetaText, { marginTop: 4 }]}
-              >
-                {activeTrack.author
-                  ? `Tác giả: ${activeTrack.author}`
-                  : "Tác giả: Chưa cập nhật"}
-              </Text>
-
-              {activeTrack.playlist && activeTrack.playlist.length > 0 && (
                 <Text
                   numberOfLines={1}
                   style={[styles.trackMetaText, { marginTop: 4 }]}
                 >
-                  Thể loại: {activeTrack.playlist.join(", ")}
+                  {activeTrack.author
+                    ? `Tác giả: ${activeTrack.author}`
+                    : "Tác giả: Chưa cập nhật"}
                 </Text>
-              )}
 
-              {/* Phần đánh giá 5 sao */}
-              <TrackRating
-                initialRating={trackRating}
-                onRatingChange={handleRatingChange}
-              />
-            </View>
+                {activeTrack.playlist && activeTrack.playlist.length > 0 && (
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.trackMetaText, { marginTop: 4 }]}
+                  >
+                    Thể loại: {activeTrack.playlist.join(", ")}
+                  </Text>
+                )}
 
-            <View style={{ marginTop: 20 }}>
-              <PlayerProgressBar />
-              <PlayerControls style={{ marginTop: 20 }} />
+                <TrackRating
+                  initialRating={trackRating}
+                  onRatingChange={handleRatingChange}
+                />
+              </View>
+
+              <View style={{ marginTop: 20 }}>
+                <PlayerProgressBar />
+                <PlayerControls style={{ marginTop: 20 }} />
+              </View>
             </View>
-          </View>
+          )}
+
+          {showLyrics && activeTrack.lyrics && (
+            <ScrollView style={styles.lyricsContainer}>
+              <Text style={styles.lyricsText}>{activeTrack.lyrics}</Text>
+            </ScrollView>
+          )}
         </View>
 
-        <View style={[styles.controlsContainer, { marginBottom: bottom }]}>
-          <PlayerVolumeBar />
-          <View style={utilsStyles.centeredRow}>
-            <PlayerRepeatToggle size={30} />
+        {!showLyrics && ( // Hide controls when showing lyrics
+          <View style={[styles.controlsContainer, { marginBottom: bottom }]}>
+            <PlayerVolumeBar />
+            <View style={utilsStyles.centeredRow}>
+              <PlayerRepeatToggle size={30} />
+            </View>
           </View>
-        </View>
+        )}
       </View>
     </LinearGradient>
-  );
-};
-
-const DismissPlayerSymbol = ({ top }) => {
-  return (
-    <View
-      style={{
-        position: "absolute",
-        top: top + 8,
-        left: 0,
-        right: 0,
-        flexDirection: "row",
-        justifyContent: "center",
-      }}
-    >
-      <View accessible={false} style={styles.dismissSymbol} />
-    </View>
   );
 };
 
@@ -181,7 +220,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    // paddingHorizontal: screenPadding.horizontal,
   },
   artworkImageContainer: {
     shadowOffset: { width: 0, height: 8 },
@@ -233,6 +271,17 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: "#fff",
     opacity: 0.7,
+  },
+  lyricsContainer: {
+    marginTop: 20,
+    paddingHorizontal: 16,
+  },
+  lyricsText: {
+    ...defaultStyles.text,
+    fontSize: 16,
+    color: "#fff",
+    lineHeight: 24,
+    textAlign: "center",
   },
 });
 

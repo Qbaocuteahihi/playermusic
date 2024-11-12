@@ -1,4 +1,3 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore"; // Import thêm doc và setDoc
@@ -21,14 +20,14 @@ export const auth = initializeAuth(app, {
 export const db = getFirestore(app);
 
 // Hàm lưu xếp hạng bài hát
-const saveTrackRating = async (trackId, rating) => {
-  try {
-    const trackRef = doc(db, "tracks", trackId); // 'tracks' là collection của bạn
-    await setDoc(trackRef, { rating }, { merge: true }); // Lưu hoặc cập nhật rating
-    console.log("Rating saved successfully");
-  } catch (error) {
-    console.error("Error saving rating: ", error);
-  }
-};
+// const saveTrackRating = async (trackId, rating) => {
+//   try {
+//     const trackRef = doc(db, "tracks", trackId); // 'tracks' là collection của bạn
+//     await setDoc(trackRef, { rating }, { merge: true }); // Lưu hoặc cập nhật rating
+//     console.log("Rating saved successfully");
+//   } catch (error) {
+//     console.error("Error saving rating: ", error);
+//   }
+// };
 
-export { saveTrackRating };
+// export { saveTrackRating };
